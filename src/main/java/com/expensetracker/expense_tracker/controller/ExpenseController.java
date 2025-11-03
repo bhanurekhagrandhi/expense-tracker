@@ -1,10 +1,11 @@
 package com.expensetracker.expense_tracker.controller;
 
-import com.expensetracker.expense_tracker.dto.ExpenseResponse;
-import com.expensetracker.expense_tracker.exception.ResourceNotFoundException;
+import com.expensetracker.expense_tracker.dto.ExpenseDTO;
 import com.expensetracker.expense_tracker.model.Expense;
-import com.expensetracker.expense_tracker.repository.ExpenseRepository;
+import com.expensetracker.expense_tracker.service.ExpenseService;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,71 +13,51 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/expenses")
+@Slf4j
 public class ExpenseController {
 
-    private final ExpenseRepository expenseRepository;
+    private final ExpenseService expenseService;
 
-    public ExpenseController(ExpenseRepository expenseRepository) {
-        this.expenseRepository = expenseRepository;
+    public ExpenseController(ExpenseService expenseService) {
+        this.expenseService = expenseService;
     }
 
     @PostMapping
-    public Expense addExpense(@Valid @RequestBody Expense expense) {
-        return expenseRepository.save(expense);
+    public ResponseEntity<ExpenseDTO> addExpense(@Valid @RequestBody ExpenseDTO expenseDTO) {
+        log.info("POST /api/expenses called with expense:{}",expenseDTO);
+        ExpenseDTO saved =  expenseService.createExpense(expenseDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @GetMapping
-    public List<ExpenseResponse> getExpenses() {
-        return expenseRepository.findAll().stream().map(exp->new ExpenseResponse(
-                exp.getId(),
-                exp.getName(),
-                exp.getAmount(),
-                exp.getDate(),
-                exp.getCategory()!=null?exp.getCategory().getName():null
-        )).toList();
+    public ResponseEntity<List<Expense>> getExpenses() {
+        log.info("GET /api/expenses called");
+        return ResponseEntity.ok(expenseService.getAllExpenses());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Expense> updateExpense(@PathVariable Long id, @Valid @RequestBody Expense expenseRequest) {
-        return expenseRepository.findById(id).map((expense -> {
-            expense.setName(expenseRequest.getName());
-            expense.setAmount(expenseRequest.getAmount());
-            expense.setDate(expenseRequest.getDate());
-            Expense updated = expenseRepository.save(expense);
-            return ResponseEntity.ok(updated);
-        })).orElseThrow(() -> new ResourceNotFoundException("Expense not found with id " + id));
+    public ResponseEntity<Expense> updateExpense(@PathVariable Long id, @Valid @RequestBody ExpenseDTO expenseDTO) {
+        log.info("PUT /api/expenses called with expense:{}",expenseDTO);
+        Expense updatedExpense = expenseService.updateExpense(id,expenseDTO);
+        return ResponseEntity.ok(expenseService.updateExpense(id,expenseDTO));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteExpense(@PathVariable Long id) {
-        return expenseRepository.findById(id).map(expense -> {
-            expenseRepository.delete(expense);
-            return ResponseEntity.ok("Deleted succesfully");
-        }).orElseThrow(() -> new ResourceNotFoundException("Expense not found with id " + id));
+    public ResponseEntity<Void> deleteExpense(@PathVariable Long id) {
+        log.info("DELETE /api/expenses called with id:{}",id);
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}")
-    public Expense updateExpensePartially(@PathVariable Long id, @RequestBody Expense updatedFields) {
-        return expenseRepository.findById(id).map(existingExpense -> {
-            if (updatedFields.getName() != null) {
-                existingExpense.setName(updatedFields.getName());
-            }
-
-            if (updatedFields.getAmount() != null) {
-                existingExpense.setAmount(updatedFields.getAmount());
-            }
-
-            if (updatedFields.getDate() != null) {
-                existingExpense.setDate(updatedFields.getDate());
-            }
-
-            return expenseRepository.save(existingExpense);
-        }).orElseThrow(() -> new ResourceNotFoundException("Expense not found with id " + id));
+    public ResponseEntity<Expense> updateExpensePartially(@PathVariable Long id, @RequestBody ExpenseDTO expenseDTO) {
+        log.info("PATCH /api/expenses called with expense:{}",expenseDTO);
+        return ResponseEntity.ok(expenseService.updateExpensePartially(id,expenseDTO));
     }
 
     @GetMapping("/category/{id}")
-    public List<Expense> getExpensesByCategory(@PathVariable Long id) {
-        return expenseRepository.findByCategoryId(id);
+    public ResponseEntity<List<Expense>> getExpensesByCategory(@PathVariable Long id) {
+        log.info("GET /api/category called with id:{}",id);
+        return ResponseEntity.ok(expenseService.getExpensesByCategory(id));
     }
 
 }

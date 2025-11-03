@@ -1,22 +1,27 @@
 package com.expensetracker.expense_tracker.dto;
 
+import com.expensetracker.expense_tracker.model.Category;
+
 import java.time.LocalDate;
 
-public class ExpenseResponse {
+public class ExpenseDTO {
 
     private Long id;
     private String name;
     private Double amount;
     private LocalDate date;
-    private String categoryId;
 
-    public ExpenseResponse(Long id, String name, Double amount, LocalDate date, String categoryId) {
-        this.id = id;
-        this.name = name;
-        this.amount = amount;
-        this.date = date;
-        this.categoryId = categoryId;
-    }
+    private CategoryDTO category;
+
+
+
+//    public ExpenseDTO(Long id, String name, Double amount, LocalDate date, CategoryDTO category) {
+//        this.id = id;
+//        this.name = name;
+//        this.amount = amount;
+//        this.date = date;
+//        this.category = category;
+//    }
 
     public Long getId() {
         return id;
@@ -50,11 +55,12 @@ public class ExpenseResponse {
         this.date = date;
     }
 
-    public String getCategoryId() {
-        return categoryId;
+    public CategoryDTO getCategory() {
+        return category;
     }
 
-    public void setCategoryId(String categoryId) {
-        this.categoryId = categoryId;
+    public void setCategory(CategoryDTO category) {
+        this.category = category;
     }
+
 }
