@@ -8,14 +8,14 @@ public class ExpenseResponse {
     private String name;
     private Double amount;
     private LocalDate date;
-    private String categoryName;
+    private String categoryId;
 
-    public ExpenseResponse(Long id, String name,Double amount,LocalDate date, String categoryName){
+    public ExpenseResponse(Long id, String name, Double amount, LocalDate date, String categoryId) {
         this.id = id;
         this.name = name;
         this.amount = amount;
         this.date = date;
-        this.categoryName = categoryName;
+        this.categoryId = categoryId;
     }
 
     public Long getId() {
@@ -50,11 +50,11 @@ public class ExpenseResponse {
         this.date = date;
     }
 
-    public String getCategoryName() {
-        return categoryName;
+    public String getCategoryId() {
+        return categoryId;
     }
 
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
+    public void setCategoryId(String categoryId) {
+        this.categoryId = categoryId;
     }
 }
